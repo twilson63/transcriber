@@ -19,6 +19,7 @@ A stateless REST API service that retrieves plain text transcripts from YouTube 
 
 - Node.js 20.x or higher
 - npm or yarn package manager
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) installed and available in PATH
 
 ## Installation
 
@@ -411,7 +412,7 @@ curl -H "X-API-Key: your-api-key" \
 
 #### Docker Deployment
 
-The included `Dockerfile` allows deployment to any Docker-compatible platform:
+The included `Dockerfile` allows deployment to any Docker-compatible platform. Note that the Docker image must include yt-dlp:
 
 ```bash
 # Build
@@ -459,9 +460,10 @@ transcriber/
 ├── src/
 │   ├── index.ts                 # Main application entry point
 │   ├── middleware/
+│   │   ├── auth.ts             # API key authentication middleware
 │   │   └── rateLimiter.ts      # Rate limiting middleware
 │   └── services/
-│       └── transcriptService.ts # YouTube transcript fetching service
+│       └── transcript.service.ts # YouTube transcript fetching via yt-dlp
 ├── dist/                        # Compiled JavaScript (generated)
 ├── node_modules/               # Dependencies (generated)
 ├── .env                        # Environment variables (not in repo)
@@ -485,13 +487,16 @@ Main Express application server. Configures middleware, routes, and starts the H
 #### `src/middleware/rateLimiter.ts`
 Rate limiting middleware that restricts requests to 1 per 30 seconds per API key.
 
-#### `src/services/transcriptService.ts`
-Core service for fetching YouTube transcripts. Includes:
-- Video ID validation
-- Transcript fetching with timeout
-- Metadata extraction
-- Retry logic with exponential backoff
-- Comprehensive error handling
+#### `src/middleware/auth.ts`
+API key authentication middleware. Validates the `X-API-Key` header against the configured `API_KEY` environment variable.
+
+#### `src/services/transcript.service.ts`
+Core service for fetching YouTube transcripts using yt-dlp. Includes:
+- Video ID validation (11-character alphanumeric format)
+- Transcript fetching via yt-dlp with 30-second timeout
+- JSON3 subtitle format parsing
+- Video metadata extraction (title, duration)
+- Automatic temp file cleanup
 
 #### `Dockerfile`
 Multi-stage Docker build configuration for production deployment.
@@ -518,9 +523,9 @@ TypeScript compiler configuration with strict mode enabled for type safety.
 |---------|---------|
 | `express` | HTTP server and routing |
 | `express-rate-limit` | Rate limiting middleware |
-| `youtube-transcript` | Fetch YouTube video transcripts |
 | `cors` | Cross-origin resource sharing |
 | `dotenv` | Environment variable management |
+| `yt-dlp` (system) | Fetch YouTube video subtitles |
 
 ### Development Tools
 

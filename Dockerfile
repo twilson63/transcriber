@@ -1,6 +1,10 @@
 # Use Node.js LTS (Long Term Support) as base image
 FROM node:20-alpine
 
+# Install yt-dlp and its dependencies
+RUN apk add --no-cache python3 py3-pip ffmpeg && \
+    pip3 install --break-system-packages yt-dlp
+
 # Set working directory
 WORKDIR /app
 

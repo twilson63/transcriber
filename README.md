@@ -167,7 +167,32 @@ curl -i -H "X-API-Key: your-api-key" \
   http://localhost:3000/api/transcript/dQw4w9WgXcQ
 ```
 
-#### 2. Health Check
+#### 2. Agent Instructions
+
+Returns markdown instructions for AI agents to use this API as a tool.
+
+**Endpoint:**
+```
+GET /api/agent
+```
+
+**Authentication:** Not required (public endpoint)
+
+**Success Response (200 OK):**
+
+Headers:
+```
+Content-Type: text/markdown
+```
+
+Body: Markdown document with tool definition, parameters, examples, and error handling instructions.
+
+**Example Request:**
+```bash
+curl http://localhost:3000/api/agent
+```
+
+#### 3. Health Check
 
 Check if the service is running and healthy.
 

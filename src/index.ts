@@ -17,8 +17,71 @@ app.use(cors());
 app.use(express.json());
 
 // Health check endpoint (no authentication required)
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response): void => {
   res.status(200).json({ status: 'healthy' });
+});
+
+// Agent instructions endpoint (no authentication required)
+app.get('/api/agent', (_req: Request, res: Response): void => {
+  const instructions = `# YouTube Transcript API - Agent Instructions
+
+## Tool Definition
+- **Name**: get_youtube_transcript
+- **Description**: Fetches the full text transcript from a YouTube video
+
+## Endpoint
+\`\`\`
+GET /api/transcript/:videoId
+\`\`\`
+
+## Authentication
+\`\`\`
+Header: X-API-Key: <your-api-key>
+\`\`\`
+
+## Parameters
+| Name | Location | Required | Format | Description |
+|------|----------|----------|--------|-------------|
+| videoId | path | yes | 11 alphanumeric chars | YouTube video ID (e.g., dQw4w9WgXcQ) |
+
+## Example Request
+\`\`\`bash
+curl -H "X-API-Key: YOUR_KEY" https://host/api/transcript/dQw4w9WgXcQ
+\`\`\`
+
+## Success Response (200)
+
+**Headers:**
+| Header | Type | Description |
+|--------|------|-------------|
+| Content-Type | string | Always \`text/plain\` |
+| X-Video-Title | string | Title of the YouTube video |
+| X-Video-Duration | number | Duration of the video in seconds |
+| X-Video-Timestamp | string | ISO 8601 timestamp of when transcript was fetched |
+
+**Body:** Plain text transcript of the video
+
+## Error Responses
+| Status | Meaning |
+|--------|---------|
+| 400 | Invalid video ID format |
+| 401 | Missing or invalid API key |
+| 404 | No transcript available for this video |
+| 429 | Rate limit exceeded (retry after 30s) |
+| 500 | Internal server error |
+
+## Rate Limit
+1 request per 30 seconds per API key. The rate limit is tracked by the X-API-Key header value.
+
+## Usage Tips
+- Extract the video ID from YouTube URLs: \`youtube.com/watch?v=VIDEO_ID\` or \`youtu.be/VIDEO_ID\`
+- Video IDs are exactly 11 characters (alphanumeric, hyphens, underscores)
+- Check the X-Video-Duration header to estimate transcript length
+- Handle 404 errors gracefully - not all videos have transcripts available
+`;
+
+  res.setHeader('Content-Type', 'text/markdown');
+  res.status(200).send(instructions);
 });
 
 // Transcript endpoint (authentication and rate limiting required)

@@ -102,9 +102,9 @@ app.get(
       // Fetch transcript
       const result = await transcriptService.getTranscript(videoId);
 
-      // Set response headers
+      // Set response headers (encode title to handle special characters)
       res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('X-Video-Title', result.title);
+      res.setHeader('X-Video-Title', encodeURIComponent(result.title));
       res.setHeader('X-Video-Duration', result.duration.toString());
       res.setHeader('X-Video-Timestamp', result.timestamp);
 

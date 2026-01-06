@@ -48,6 +48,7 @@ export class TranscriptService {
 
       const { stdout } = await execAsync(command, {
         timeout: 30000, // 30 second timeout
+        maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large JSON output
       });
 
       // Parse video info from JSON output
